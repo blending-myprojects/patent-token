@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Patent Coin Dapp</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <h1>Patent Coin Dapp</h1>
+    <label for="patentName">Patent Name:</label>
+    <input type="text" id="patentName" />
+    <label for="patentDescription">Patent Description:</label>
+    <input type="text" id="patentDescription" />
+    <label for="totalTokens">Total Tokens:</label>
+    <input type="number" id="totalTokens" />
+    <label for="senderAddressOfMint">Sender Address:</label>
+    <input type="text" id="senderAddressOfMint" />
+    <button onclick="mintPatent()">Mint Patent</button>
+    <br />
+    <label for="recipientAddress">Recipient Address:</label>
+    <input type="text" id="recipientAddress" />
+    <label for="transferAmount">Transfer Amount:</label>
+    <input type="number" id="transferAmount" />
+    <label for="patentId">Patent ID:</label>
+    <input type="number" id="patentId" />
+    <label for="senderAddressOfTransfer">Sender Address:</label>
+    <input type="text" id="senderAddressOfTransfer" />
+    <button onclick="transferTokens()">Transfer Tokens</button>
+
+    <h2>Get User Patents</h2>
+    <label for="userAddress">User Address:</label>
+    <input type="text" id="userAddress" />
+    <button onclick="getUserPatents()">Get Patents</button>
+    <div id="patentList"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@4.8.0/dist/web3.min.js"></script>
+    <script>
+  
+  PROVIDER
+      // Web3 인스턴스를 생성합니다.
+      const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID'));
+      let contract;
+
+      fetch('../contract')
+        .then(response => response.json())
+        .then(data => {
+        const contractAbi = data;
+        const contractAddress = 'CONTRACT_ADDRESS';
+
+        // 계약 인스턴스를 생성합니다.
+        contract = new web3.eth.Contract(contractAbi, contractAddress);
+      })
+      .catch(error => console.error('Error loading ABI:', error));
+
+      // mintPatent 함수를 정의합니다.
+      async function mintPatent() {
+        const patentName = document.getElementById('patentName').value;
+        const patentDescription = document.getElementById('patentDescription').value;
+        const totalTokens = document.getElementById('totalTokens').value;
+        const senderAddress = document.getElementById('senderAddressOfMint').value;
+
+        const transactionData = await contract.methods.mintPatent(patentName, patentDescription, totalTokens).encodeABI();
+        const privateKey = "(SENDER)ONWER_PRIVATE_KEY";
+        
+        const gasLimit = await web3.eth.estimateGas({ to: contract.options.address, data: transactionData, from: senderAddress })
+
+        const rawTransaction = {
+          to: contract.options.address, // 스마트 컨트랙트 주소
+          data: transactionData, // 트랜잭션 데이터
+          gas: '4000000', // 가스 설정
+          gas: gasLimit, // gasLimit 설정
+          maxFeePerGas: '100000000000', // 최대 가스 가격 (10 Gwei)
+          maxPriorityFeePerGas: '30000000000', // 최대 우선순위 가스 가격 (3 Gwei)
+          from: senderAddress, // 발송 계정
+        };
+
+        const signedTransaction = await web3.eth.accounts.signTransaction(rawTransaction, privateKey);
+        const result = await web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
+
+        console.log(result);
+      }
+
+      // transferTokens 함수를 정의합니다.
+      async function transferTokens() {
+        const recipientAddress = document.getElementById('recipientAddress').value;
+        const transferAmount = document.getElementById('transferAmount').value;
+        const patentId = document.getElementById('patentId').value;
+        const senderAddress = document.getElementById('senderAddressOfTransfer').value;
+
+        const transactionData = await contract.methods.transfer(recipientAddress, transferAmount, patentId).encodeABI();
+        const privateKey = "SENDER_PRIVATE_KEY";
+        
+        const gasLimit = await web3.eth.estimateGas({ to: contract.options.address, data: transactionData, from: senderAddress })
+
+        const rawTransaction = {
+          to: contract.options.address, // 스마트 컨트랙트 주소
+          data: transactionData, // 트랜잭션 데이터
+          gas: '4000000', // 가스 설정
+          gas: gasLimit, // gasLimit 설정
+          maxFeePerGas: '100000000000', // 최대 가스 가격 (10 Gwei)
+          maxPriorityFeePerGas: '30000000000', // 최대 우선순위 가스 가격 (3 Gwei)
+          from: senderAddress, // 발송 계정
+        };
+
+        const signedTransaction = await web3.eth.accounts.signTransaction(rawTransaction, privateKey);
+        const result = await web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
+        
+        console.log(result); 
+      }
+
+      async function getUserPatents() {
+        const userAddress = document.getElementById('userAddress').value;
+        const result = await contract.methods.getUserPatents(userAddress).call();
+        const patentIds = result[0];
+        const patentShares = result[1];
+
+        const patentList = document.getElementById('patentList');
+        patentList.innerHTML = '';
+
+        for (let i = 0; i < patentIds.length; i++) {
+          const patentId = patentIds[i];
+          const patentShare = patentShares[i];
+          const patentInfo = await contract.methods.getPatentInfo(patentId).call();
+          const patentName = patentInfo[0];
+          const totalTokens = patentInfo[1];
+
+          const patentDiv = document.createElement('div');
+          patentDiv.innerHTML = `
+            <p>Patent ID: ${patentId}</p>
+            <p>Patent Name: ${patentName}</p>
+            <p>Total Tokens: ${totalTokens}</p>
+            <p>User's Share: ${patentShare}</p>
+          `;
+          patentList.appendChild(patentDiv);
+        }
+      }
+    </script>
+  </body>
+</html>
