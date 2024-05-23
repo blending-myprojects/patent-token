@@ -65,10 +65,10 @@
         const rawTransaction = {
           to: contract.options.address, // 스마트 컨트랙트 주소
           data: transactionData, // 트랜잭션 데이터
-          gas: '4000000', // 가스 설정
+          gas: '2000000', // 가스 설정
           gas: gasLimit, // gasLimit 설정
-          maxFeePerGas: '100000000000', // 최대 가스 가격 (10 Gwei)
-          maxPriorityFeePerGas: '30000000000', // 최대 우선순위 가스 가격 (3 Gwei)
+          maxFeePerGas: '10000000000', // 최대 가스 가격 (1 Gwei)
+          maxPriorityFeePerGas: '3000000000', // 최대 우선순위 가스 가격 (0.3 Gwei)
           from: senderAddress, // 발송 계정
         };
 
@@ -93,10 +93,10 @@
         const rawTransaction = {
           to: contract.options.address, // 스마트 컨트랙트 주소
           data: transactionData, // 트랜잭션 데이터
-          gas: '4000000', // 가스 설정
+          gas: '2000000', // 가스 설정
           gas: gasLimit, // gasLimit 설정
-          maxFeePerGas: '100000000000', // 최대 가스 가격 (10 Gwei)
-          maxPriorityFeePerGas: '30000000000', // 최대 우선순위 가스 가격 (3 Gwei)
+          maxFeePerGas: '10000000000', // 최대 가스 가격 (1 Gwei)
+          maxPriorityFeePerGas: '3000000000', // 최대 우선순위 가스 가격 (0.3 Gwei)
           from: senderAddress, // 발송 계정
         };
 
@@ -121,6 +121,10 @@
           const patentInfo = await contract.methods.getPatentInfo(patentId).call();
           const patentName = patentInfo[0];
           const totalTokens = patentInfo[1];
+          const description = patentInfo[2];
+          const exchange = patentInfo[3];
+          
+          console.log(patentInfo);
 
           const patentDiv = document.createElement('div');
           patentDiv.innerHTML = `
@@ -128,6 +132,8 @@
             <p>Patent Name: ${patentName}</p>
             <p>Total Tokens: ${totalTokens}</p>
             <p>User's Share: ${patentShare}</p>
+            <p>Patent description: ${description}</p>
+            <p>Patent exchange: ${exchange}</p>
           `;
           patentList.appendChild(patentDiv);
         }
