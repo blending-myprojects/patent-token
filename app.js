@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 
 // 라우트 핸들러를 추가합니다.
 app.get('/contract', (req, res) => {
-  res.sendFile(__dirname + '/contract/MYToken.json');
+  res.sendFile(__dirname + '/contract/BlendingToken.json');
 });
 
 // 서버를 시작합니다.
