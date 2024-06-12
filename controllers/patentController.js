@@ -4,6 +4,7 @@ const { CONTRACT_OWNER_PRIVATE_KEY, CONTRACT_OWNER_ADDRESS, CONTRACT_ADDRESS } =
 
 const transactionService = new TransactionService();
 
+/*
 async function mintPatent (req, res, next) {
     try {
         const { patentName, category, country, patentDescription, totalTokens } = req.body;
@@ -48,6 +49,8 @@ async function getUserPatents (req, res, next) {
             CONTRACT_ADDRESS
         );
 
+        console.log(result)
+
         const userPatents = [];
 
         // result의 구조에 따라 값을 추출합니다.
@@ -74,7 +77,58 @@ async function getUserPatents (req, res, next) {
         next(err);
     }
 };
+*/
 
+async function getPatentInfo(req, res, next) {
+    try {
+        const patentInfo = await transactionService.callMethod(
+            'getPatentInfo',
+            [],
+            CONTRACT_ADDRESS
+        );
+
+        console.log(patentInfo)
+
+        res.status(200).json({
+            patentName: patentInfo[0],
+            category: patentInfo[1],
+            country: patentInfo[2],
+            description: patentInfo[3],
+            exchange: patentInfo[4],
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function getTotalSupply(req, res, next) {
+    try {
+        const totalSupply = await transactionService.callMethod(
+            'totalSupply',
+            [],
+            CONTRACT_ADDRESS
+        );
+
+        res.status(200).json({ totalSupply: replaceBigInts(totalSupply) });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function getBalanceOf(req, res, next) {
+    try {
+        const { address } = req.params;
+        const balance = await transactionService.callMethod(
+            'balanceOf',
+            [address],
+            CONTRACT_ADDRESS
+        );
+
+        res.status(200).json({ balance: replaceBigInts(balance) });
+    } catch (err) {
+        next(err);
+    }
+}
 
 function replaceBigInts(value) {
     if (typeof value === 'bigint') {
@@ -92,7 +146,12 @@ function replaceBigInts(value) {
 
 
 module.exports = {
+    /*
     mintPatent,
     transferTokens,
-    getUserPatents
+    getUserPatents,
+    */
+    getPatentInfo,
+    getTotalSupply,
+    getBalanceOf
 }
