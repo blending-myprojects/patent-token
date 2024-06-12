@@ -26,6 +26,9 @@ router.get('/totalSupply', patentController.getTotalSupply);
 // 사용자 특허 소유량 조회 라우트
 router.get('/balance/:address', patentController.getBalanceOf);
 
+// 토큰 전송 라우트
+router.post('/transfer', patentController.transferTokens);
+
 
 module.exports = {
     router

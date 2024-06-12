@@ -130,6 +130,23 @@ async function getBalanceOf(req, res, next) {
     }
 }
 
+async function transferTokens(req, res, next) {
+    try {
+        const { senderAddress, recipientAddress, amount } = req.body;
+
+        const result = await transactionService.sendTransaction(
+            'transfer',
+            [recipientAddress, amount],
+            senderAddress,
+            CONTRACT_OWNER_PRIVATE_KEY
+        );
+
+        res.status(200).json({ message: '토큰 전송이 완료되었습니다.', result: replaceBigInts(result) });
+    } catch (err) {
+        next(err);
+    }
+}
+
 function replaceBigInts(value) {
     if (typeof value === 'bigint') {
         return value.toString();
@@ -153,5 +170,6 @@ module.exports = {
     */
     getPatentInfo,
     getTotalSupply,
-    getBalanceOf
+    getBalanceOf,
+    transferTokens
 }
